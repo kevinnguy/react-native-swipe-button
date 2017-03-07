@@ -21,6 +21,16 @@ const runAfterInteractions = func => {
 }
 
 export default class SwipeButton extends Component {
+  constructor() {
+    super();
+
+    const marginLeft = this.props.style.marginHorizontal || this.props.style.marginLeft || 0;
+    const marginRight = this.props.style.marginHorizontal || this.props.style.marginRight || 0;
+    const buttonWidth = (this.props.style.width || Dimensions.get('window').width) - marginLeft - marginRight;
+
+    this.state = { buttonWidth }
+  }
+
   componentDidMount() {
     if (Platform.OS === 'ios') {
       this.resetSwipePosition();
@@ -31,13 +41,13 @@ export default class SwipeButton extends Component {
 
   resetSwipePosition() {
     if (this.scrollView) {
-      this.scrollView.scrollTo({ x: buttonWidth, animated: false });
+      this.scrollView.scrollTo({ x: this.state.buttonWidth, animated: false });
     }
   }
 
   onSwipe(offset) {
     const position = offset.nativeEvent.contentOffset.x;
-    if (position === 0 || position === (buttonWidth * 2)) {
+    if (position === 0 || position === (this.state.buttonWidth * 2)) {
       this.props.onSwipe();
 
       if (Platform.OS === 'ios') {
@@ -59,7 +69,7 @@ export default class SwipeButton extends Component {
         <ScrollView
           ref={input => { this.scrollView = input; }}
           style={[styles.button, this.props.style]}
-          contentContainerStyle={styles.scrollView}
+          contentContainerStyle={[styles.scrollView, { width: this.state.buttonWidth * 3 }]}
           horizontal
           scrollEnabled
           pagingEnabled
@@ -88,12 +98,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: buttonWidth * 3,
   },
   button: {
     height: 50,
     borderTopWidth: 0.5,
-    marginHorizontal: buttonPaddingHorizontal,
   },
   buttonTitle: {
     color: 'white',
