@@ -10,6 +10,7 @@ import {
 
 type Props = {
   title?: string;
+  containerStyle?: any;
   style?: any;
   textStyle?: any;
   allowFontScaling?: bool;
@@ -24,9 +25,10 @@ export default class SwipeButton extends Component {
   constructor() {
     super();
 
-    const marginLeft = this.props.style.marginHorizontal || this.props.style.marginLeft || 0;
-    const marginRight = this.props.style.marginHorizontal || this.props.style.marginRight || 0;
-    const buttonWidth = (this.props.style.width || Dimensions.get('window').width) - marginLeft - marginRight;
+    const { containerStyle } = this.props;
+    const marginLeft = containerStyle.marginHorizontal || containerStyle.marginLeft || 0;
+    const marginRight = containerStyle.marginHorizontal || containerStyle.marginRight || 0;
+    const buttonWidth = (containerStyle.width || Dimensions.get('window').width) - marginLeft - marginRight;
 
     this.state = { buttonWidth }
   }
@@ -64,22 +66,24 @@ export default class SwipeButton extends Component {
   props: Props
 
   render() {
+    const { title, containerStyle, style, textStyle, allowFontScaling, onSwipe } = this.props;
+
     return (
-      <View style={[this.props.style, styles.container]}>
+      <View style={[styles.container, containerStyle]}>
         <ScrollView
           ref={input => { this.scrollView = input; }}
-          style={[styles.button, this.props.style]}
+          style={[styles.buttonStyle, style]}
           contentContainerStyle={[styles.scrollView, { width: this.state.buttonWidth * 3 }]}
           horizontal
           scrollEnabled
           pagingEnabled
           bounces={false}
           showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={offset => this.onSwipe(offset)}>
+          onMomentumScrollEnd={offset => onSwipe(offset)}>
           <Text
-            style={[styles.buttonTitle, this.props.textStyle]}
-            allowFontScaling={this.props.allowFontScaling}>
-            {this.props.title}
+            style={[styles.buttonTitle, textStyle]}
+            allowFontScaling={allowFontScaling}>
+            {title}
           </Text>
         </ScrollView>
       </View>
