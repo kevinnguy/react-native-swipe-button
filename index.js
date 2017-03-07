@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+  Dimensions,
   InteractionManager,
   Platform,
   ScrollView,
@@ -18,17 +19,17 @@ type Props = {
 };
 
 const runAfterInteractions = func => {
-  setTimeout(() => InteractionManager.runAfterInteractions(func()), 1);
+  setTimeout(() => InteractionManager.runAfterInteractions(() => func()), 1);
 }
 
 export default class SwipeButton extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
-    const { containerStyle } = this.props;
-    const marginLeft = containerStyle.marginHorizontal || containerStyle.marginLeft || 0;
-    const marginRight = containerStyle.marginHorizontal || containerStyle.marginRight || 0;
-    const buttonWidth = (containerStyle.width || Dimensions.get('window').width) - marginLeft - marginRight;
+    const { style } = this.props;
+    const marginLeft = style.marginHorizontal || style.marginLeft || 0;
+    const marginRight = style.marginHorizontal || style.marginRight || 0;
+    const buttonWidth = (style.width || Dimensions.get('window').width) - marginLeft - marginRight;
 
     this.state = { buttonWidth }
   }
@@ -47,11 +48,12 @@ export default class SwipeButton extends Component {
     }
   }
 
-  onSwipe(offset) {
+  onSwipeButton(offset) {
+    const { onSwipe } = this.props;
+    const { buttonWidth } = this.state;
     const position = offset.nativeEvent.contentOffset.x;
-    if (position === 0 || position === (this.state.buttonWidth * 2)) {
-      this.props.onSwipe();
 
+    if (position === 0 || position === (this.state.buttonWidth * 2)) {
       if (Platform.OS === 'ios') {
         this.resetSwipePosition();
       } else if (Platform.OS === 'android') {
@@ -60,13 +62,17 @@ export default class SwipeButton extends Component {
           setTimeout(() => this.resetSwipePosition(), 500); // Strangely, this is necessary on Android
         });
       }
+
+      if (this.scrollView) {
+        onSwipe();
+      }
     }
   }
 
   props: Props
 
   render() {
-    const { title, containerStyle, style, textStyle, allowFontScaling, onSwipe } = this.props;
+    const { title, containerStyle, style, textStyle, allowFontScaling } = this.props;
 
     return (
       <View style={[styles.container, containerStyle]}>
@@ -79,7 +85,7 @@ export default class SwipeButton extends Component {
           pagingEnabled
           bounces={false}
           showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={offset => onSwipe(offset)}>
+          onMomentumScrollEnd={offset => this.onSwipeButton(offset)}>
           <Text
             style={[styles.buttonTitle, textStyle]}
             allowFontScaling={allowFontScaling}>
